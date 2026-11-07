@@ -298,6 +298,20 @@ table.gtab td .ar{font-size:1.02rem;}
 .cdo-btn{border:1px solid #D5CFC6;background:transparent;border-radius:14px;padding:3px 10px;font-size:.7rem;cursor:pointer;color:inherit;}
 .cdo-btn.on{background:#EFE6DA;border-color:#8A6A3A;font-weight:700;}
 .cdo-bar{display:flex;height:8px;border-radius:5px;background:#E8E3DC;overflow:hidden;margin-top:4px;}
+@media(max-width:700px){
+body.ex .topbar,body.ex .warnbox,body.ex .resbar,body.ex .ban{display:none !important;}
+body.ex .wrap{padding:0 12px 24px;}
+body.ex .stabs{padding:7px 0 6px;margin-bottom:8px;flex-wrap:nowrap;overflow-x:auto;gap:5px;}
+body.ex .stabs .tgrp{display:contents;}
+body.ex .stabs .tgl{display:none;}
+body.ex .stabs .sb{flex:0 0 auto;white-space:nowrap;}
+body.ex .sh{margin-top:2px;}
+body.ex .qpanel{padding:14px 14px 10px;}
+body.ex .qsticky .qopt{padding:11px 12px;margin-bottom:6px;}
+.exmenu{display:inline-block !important;flex:0 0 auto;font-weight:700;}
+}
+@media(min-width:701px){.exmenu{display:none !important;}}
+@media(max-width:700px){.exmenu{position:sticky;left:0;z-index:3;background:var(--cr);box-shadow:6px 0 6px -2px var(--cr);}}
 </style>
 </head>
 <body style="filter:brightness(var(--uibright,1))">
@@ -2951,6 +2965,48 @@ function rRev(){
   h+='</div></div>';
   return h;
 }
+
+// ---------- Handy-Modus: Uebungen ohne Kopfbereich, Tab-Leiste kompakt ----------
+var EX_TABS={drills:1,questions:1,dlgquiz:1,review:1,quiz:1,satzbau:1,satzquiz:1,sentences:1};
+var exFull=false;
+function exIsMobile(){return window.innerWidth<=700;}
+function exApply(){
+  var on=!!(EX_TABS[sec]&&!exFull&&exIsMobile());
+  document.body.classList.toggle('ex',on);
+  var st=document.querySelector('.stabs');
+  if(st&&EX_TABS[sec]&&exIsMobile()){
+    var b=document.createElement('button');
+    b.className='sb exmenu';
+    b.textContent=exFull?'▲ Kompakt':'☰ Menü';
+    b.onclick=exMenu;
+    st.insertBefore(b,st.firstChild);
+    var act=st.querySelector('.sb.on');
+    if(act&&on){try{st.scrollLeft=Math.max(0,act.offsetLeft-70);}catch(err){}}
+  }
+}
+function exMenu(){exFull=!exFull;ren();window.scrollTo(0,0);}
+function exNextVisible(){
+  if(!document.body.classList.contains('ex'))return;
+  var bs=document.querySelectorAll('.qsticky .qbtn');
+  for(var i=0;i<bs.length;i++){
+    var oc=bs[i].getAttribute('onclick')||'';
+    if(/Next\(|Weiter|dqbNext|sbNext/.test(oc+bs[i].textContent)){
+      try{bs[i].scrollIntoView({block:'nearest',behavior:'smooth'});}catch(err){}
+      return;
+    }
+  }
+}
+var _ren_ex=ren;
+ren=function(){_ren_ex.apply(this,arguments);exApply();setTimeout(exNextVisible,60);};
+var _ss_ex=ss;
+ss=function(s){exFull=false;_ss_ex.apply(this,arguments);if(exIsMobile())window.scrollTo(0,0);};
+window.addEventListener('resize',function(){exApply();});
+document.addEventListener('focusin',function(ev){
+  var t=ev.target;
+  if(t&&(t.tagName==='TEXTAREA'||t.tagName==='INPUT')&&exIsMobile()){
+    setTimeout(function(){try{t.scrollIntoView({block:'center',behavior:'smooth'});}catch(err){}},350);
+  }
+});
 
 </script>
 </body>
